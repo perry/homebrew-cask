@@ -40,6 +40,22 @@ module Cask::Locations
       @qlplugindir = _qlplugindir
     end
 
+    def widgetdir
+      @widgetdir ||= Pathname.new('~/Library/Widgets').expand_path
+    end
+
+    def widgetdir=(_widgetdir)
+      @widgetdir = _widgetdir
+    end
+
+    def fontdir
+      @fontdir ||= Pathname.new('~/Library/Fonts').expand_path
+    end
+
+    def fontdir=(_fontdir)
+      @fontdir = _fontdir
+    end
+
     def default_tap
       @default_tap ||= 'phinze-cask'
     end

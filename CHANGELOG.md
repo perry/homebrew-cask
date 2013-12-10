@@ -1,5 +1,43 @@
 # CHANGELOG
 
+## 0.24.0
+
+* __Features__
+  - #2018 - add :quit key to uninstall
+* __Fixes__
+  - #2019 - validate keys given to uninstall
+* __Breaking Changes__
+
+## 0.23.0
+
+* __Features__
+  - #2012 - support `--verbose` flag for pkg installer
+  - #2013 - support for installing widgets via the `widget` artifact
+* __Fixes__
+* __Breaking Changes__
+
+## 0.22.0
+
+* __Features__
+  - support for installing fonts via the `font` artifact <3 [@rolandwalker][]
+  - casks can run arbitrary blocks after install/uninstall
+  - casks without ruby files now show up in `brew cask list` and can be uninstalled
+* __Fixes__
+* __Breaking Changes__
+  - the format of `brew cask list` has changed, we now include `(!)` after
+    casks that don't have ruby files
+
+[@rolandwalker]: https://github.com/rolandwalker
+
+## 0.21.1
+
+* __Features__
+* __Fixes__
+  - [#1882][] - Ensure QuickLook directory exists <3 [@peeja][]
+* __Breaking Changes__
+
+[@peeja]: https://github.com/peeja
+
 ## 0.21.0
 
 * __Features__

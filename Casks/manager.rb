@@ -1,7 +1,7 @@
 class Manager < Cask
-  url 'http://cdn.manager.io/downloads/v13.11.5073.14603/Manager.dmg'
+  url 'http://cdn.manager.io/downloads/v13.12.1/Manager.dmg'
   homepage 'http://manager.io'
-  version '13.11.5073.14603'
-  sha1 'a63a31c06e963e48e7c1ec6568b741b7aa5c5168'
+  version '13.12.1'
+  sha1 'b91337f001397f868113b8e31eca4067bbae8f8f'
   link 'Manager.app'
 end

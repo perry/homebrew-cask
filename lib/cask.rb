@@ -7,6 +7,7 @@ class Cask; end
 require 'cask/artifact'
 require 'cask/audit'
 require 'cask/auditor'
+require 'cask/without_source'
 require 'cask/checkable'
 require 'cask/cli'
 require 'cask/container'
@@ -42,6 +43,7 @@ class Cask
       system "#{sudo} chown -R #{current_user}:staff #{caskroom.parent}"
     end
     appdir.mkpath unless appdir.exist?
+    qlplugindir.mkpath unless qlplugindir.exist?
   end
 
   def self.load(query)
@@ -58,11 +60,11 @@ class Cask
   end
 
   def caskroom_path
-    self.class.caskroom.join(self.title)
+    self.class.caskroom.join(title)
   end
 
   def destination_path
-    caskroom_path.join(self.version)
+    caskroom_path.join(version)
   end
 
   def installed?

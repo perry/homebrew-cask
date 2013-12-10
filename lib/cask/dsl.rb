@@ -41,12 +41,25 @@ module Cask::DSL
       :nested_container,
       :prefpane,
       :qlplugin,
+      :font,
       :uninstall,
+      :widget,
     ]
 
     ARTIFACT_TYPES.each do |type|
       define_method(type) do |*args|
         artifacts[type].merge(args)
+      end
+    end
+
+    ARTIFACT_BLOCK_TYPES = [
+      :after_install,
+      :after_uninstall
+    ]
+
+    ARTIFACT_BLOCK_TYPES.each do |type|
+      define_method(type) do |&block|
+        artifacts[type] << block
       end
     end
 
