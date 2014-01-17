@@ -1,6 +1,34 @@
 class Cask::Artifact::Pkg < Cask::Artifact::Base
-  def self.me?(cask)
-    cask.artifacts[:install].any?
+  # this class actually covers two keys, :install and :uninstall
+  def self.artifact_dsl_key
+    :install
+  end
+
+  def self.read_script_arguments(uninstall_options, key)
+    script_arguments = uninstall_options[key]
+
+    # backwards-compatible string value
+    if script_arguments.kind_of?(String)
+      script_arguments = { :executable => script_arguments }
+    end
+
+    # key sanity
+    permitted_keys = [:args, :input, :executable]
+    unknown_keys = script_arguments.keys - permitted_keys
+    unless unknown_keys.empty?
+      opoo "Unknown arguments to uninstall :#{key} -- :#{unknown_keys.join(", :")} (ignored). Running `brew update; brew upgrade brew-cask` will likely fix it.'"
+    end
+    script_arguments.reject! {|k,v| ! permitted_keys.include?(k)}
+
+    # extract executable
+    if script_arguments.key?(:executable)
+      executable = script_arguments.delete(:executable)
+    else
+      executable = nil
+    end
+
+    script_arguments.merge!(:sudo => true, :print => true)
+    return executable, script_arguments
   end
 
   def install
@@ -18,7 +46,7 @@ class Cask::Artifact::Pkg < Cask::Artifact::Base
       '-target', '/'
     ]
     args << '-verboseR' if ARGV.verbose?
-    @command.run!('installer', {:sudo => true, :args => args, :print => true})
+    @command.run!('/usr/sbin/installer', {:sudo => true, :args => args, :print => true})
   end
 
   def manually_uninstall(uninstall_options)
@@ -29,26 +57,26 @@ class Cask::Artifact::Pkg < Cask::Artifact::Base
     end
 
     ohai "Running uninstall process for #{@cask}; your password may be necessary."
+
     if uninstall_options.key? :script
-      @command.run!(
-        @cask.destination_path.join(uninstall_options[:script]),
-        uninstall_options.merge(:sudo => true, :print => true)
-      )
+      executable, script_arguments = self.class.read_script_arguments(uninstall_options, :script)
+      raise "Error in Cask #{@cask}: uninstall :script without :executable." if executable.nil?
+      @command.run!(@cask.destination_path.join(executable), script_arguments)
     end
 
     if uninstall_options.key? :launchctl
       [*uninstall_options[:launchctl]].each do |service|
         ohai "Removing launchctl service #{service}"
-        @command.run!('launchctl', :args => ['remove', service], :sudo => true)
+        @command.run!('/bin/launchctl', :args => ['remove', service], :sudo => true)
       end
     end
 
     if uninstall_options.key? :quit
       [*uninstall_options[:quit]].each do |id|
         ohai "Quitting application ID #{id}"
-        is_running = @command.run!('osascript', :args => ['-e', "if application id \"#{id}\" is running then 1"], :sudo => true)
-        if is_running == "1\n"
-          @command.run!('osascript', :args => ['-e', "tell application id \"#{id}\" to quit"], :sudo => true)
+        num_running = @command.run!('/usr/bin/osascript', :args => ['-e', "tell application \"System Events\" to count processes whose bundle identifier is \"#{id}\""], :sudo => true).to_i
+        if num_running > 0
+          @command.run!('/usr/bin/osascript', :args => ['-e', "tell application id \"#{id}\" to quit"], :sudo => true)
         end
       end
     end
@@ -56,7 +84,10 @@ class Cask::Artifact::Pkg < Cask::Artifact::Base
     if uninstall_options.key? :kext
       [*uninstall_options[:kext]].each do |kext|
         ohai "Unloading kernel extension #{kext}"
-        @command.run!('kextunload', :args => ['-b', kext], :sudo => true)
+        is_loaded = @command.run!('/usr/sbin/kextstat', :args => ['-l', '-b', kext], :sudo => true)
+        if is_loaded.length > 1
+          @command.run!('/sbin/kextunload', :args => ['-b', kext], :sudo => true)
+        end
       end
     end
 
@@ -68,7 +99,7 @@ class Cask::Artifact::Pkg < Cask::Artifact::Base
     if uninstall_options.key? :files
       uninstall_options[:files].each do |file|
         ohai "Removing file #{file}"
-        @command.run!('rm', :args => ['-rf', file], :sudo => true)
+        @command.run!('/bin/rm', :args => ['-rf', file], :sudo => true)
       end
     end
   end

@@ -1,8 +1,8 @@
-require 'uri'
-
 HOMEBREW_CACHE_CASKS = HOMEBREW_CACHE.join('Casks')
 
 class Cask; end
+
+require 'download_strategy'
 
 require 'cask/artifact'
 require 'cask/audit'
@@ -12,18 +12,22 @@ require 'cask/checkable'
 require 'cask/cli'
 require 'cask/container'
 require 'cask/download'
+require 'cask/download_strategy'
 require 'cask/dsl'
 require 'cask/exceptions'
 require 'cask/fetcher'
 require 'cask/installer'
 require 'cask/link_checker'
 require 'cask/locations'
+require 'cask/options'
 require 'cask/pkg'
 require 'cask/pretty_listing'
+require 'cask/qualified_cask_name'
 require 'cask/scopes'
 require 'cask/source'
 require 'cask/system_command'
 require 'cask/underscore_supporting_uri'
+require 'cask/url'
 
 require 'plist/parser'
 
@@ -31,6 +35,7 @@ class Cask
   include Cask::DSL
   include Cask::Locations
   include Cask::Scopes
+  include Cask::Options
 
   def self.init
     HOMEBREW_CACHE.mkpath unless HOMEBREW_CACHE.exist?
@@ -38,9 +43,13 @@ class Cask
       ohai "We need to make Caskroom for the first time at #{caskroom}"
       ohai "We'll set permissions properly so we won't need sudo in the future"
       current_user = ENV['USER']
-      sudo = 'sudo' unless caskroom.parent.writable?
-      system "#{sudo} mkdir -p #{caskroom}"
-      system "#{sudo} chown -R #{current_user}:staff #{caskroom.parent}"
+      if caskroom.parent.writable?
+        system "mkdir #{caskroom}"
+      else
+        # sudo in system is rude.
+        system "sudo mkdir -p #{caskroom}"
+        system "sudo chown -R #{current_user}:staff #{caskroom.parent}"
+      end
     end
     appdir.mkpath unless appdir.exist?
     qlplugindir.mkpath unless qlplugindir.exist?

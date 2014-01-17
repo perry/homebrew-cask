@@ -13,6 +13,7 @@ class Cask::Audit
   def run!(download = false)
     _check_required_fields
     _check_checksums
+    _check_no_checksums_if_latest
     _check_sourceforge_download_url_format
     _check_download(download) if download
   end
@@ -33,6 +34,10 @@ class Cask::Audit
     add_error "could not find checksum or no_checksum" unless cask.sums.is_a?(Array) && cask.sums.length > 0
   end
 
+  def _check_no_checksums_if_latest
+    add_error "you should use no_checksum when version is latest" if cask.version == "latest" && cask.sums.is_a?(Array)
+  end
+
   def _check_download(download)
     download.perform
   rescue => e
@@ -50,6 +55,7 @@ class Cask::Audit
     valid_url_formats = [
       %r{https?://sourceforge.net/projects/.*/files/latest/download},
       %r{https?://downloads.sourceforge.net/},
+      %r{https?://dl.sourceforge.jp/},
     ]
     valid_url_formats.none? { |format| cask.url.to_s =~ format }
   end

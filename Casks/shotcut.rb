@@ -1,7 +1,7 @@
 class Shotcut < Cask
-  url 'http://d1av856udzjaks.cloudfront.net/shotcut/shotcut-osx-x86_64-131120.dmg'
+  url 'http://d1av856udzjaks.cloudfront.net/shotcut/shotcut-osx-x86_64-140116.dmg'
   homepage 'http://www.shotcut.org/'
-  version '131120'
-  sha1 '8120214bdba4fc50c1af4f798e42410a3dc90aae'
+  version '140116'
+  sha1 'b6a6b213e1f01af31105e77a941dc727ea394d50'
   link 'Shotcut.app'
 end

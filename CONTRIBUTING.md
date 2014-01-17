@@ -70,10 +70,10 @@ cask (e.g. beta or nightly), then the Cask should be submitted to the
 
 Fill in the following fields for your Cask:
 
-| field              | explanation |
+| field              | description |
 | ------------------ | ----------- |
 | __cask metadata__  | information about the Cask (required)
-| `url`              | URL to the `.dmg`/`.zip`/`.tgz` file that contains the application
+| `url`              | URL to the `.dmg`/`.zip`/`.tgz` file that contains the application (see __URL Details__ for more information)
 | `homepage`         | application homepage; used for the `brew cask home` command
 | `version`          | application version; determines the directory structure in the Caskroom
 | `sha1`             | SHA-1 Checksum of the file; checked when the file is downloaded to prevent any funny business (can be omitted with `no_checksum`)
@@ -84,18 +84,32 @@ Fill in the following fields for your Cask:
 
 Additional fields you might need for special use-cases:
 
-| field              | explanation |
+| field              | description |
+| ------------------ | ----------- |
 | `prefpane`         | relative path to a preference pane that should be linked into the `~/Library/PreferencePanes` folder on installation
+| `colorpicker`      | relative path to a ColorPicker plugin that should be linked into the `~/Library/ColorPickers` folder on installation
 | `qlplugin`         | relative path to a QuickLook plugin that should be linked into the `~/Library/QuickLook` folder on installation
 | `font`             | relative path to a font that should be linked into the `~/Library/Fonts` folder on installation
 | `widget`           | relative path to a widget that should be linked into the `~/Library/Widgets` folder on installation
+| `service`          | relative path to a service that should be linked into the `~/Library/Services` folder on installation
+| `binary`           | relative path to a binary that should be linked into the `~/usr/local/bin` folder on installation
 | `nested_container` | relative path to an inner container that must be extracted before moving on with the installation; this allows us to support dmg inside tar, zip inside dmg, etc.
 | `caveats`          | a Ruby block providing the user with Cask-specific information at install time
 | `after_install`    | a Ruby block containing postflight install operations
 | `after_uninstall`  | a Ruby block containing postflight uninstall operations
 
 
-### SourceForge URLs
+### URL Details
+
+In most cases, a plain URL is all you need to specify for Cask to download and extract a file. Sometimes, additional information is required for the `curl`-based downloader to successfully fetch the file. There are a few options to help in these cases, which are specified in a hash as a second argument to `url`.
+
+| option             | description |
+| ------------------ | ----------- |
+| `:cookies`         | a hash of cookies to be set in the download request
+| `:referer`         | a URL to set as referrer in the download request
+| `:user_agent`      | user agent string to set for the download request. can also be set to `:fake`, which will use a generic Browser-like user agent string. we prefer `:fake` when the server does not require a specific user agent.
+
+#### SourceForge URLs
 
 SourceForge projects are a common way to distribute binaries, but they provide many different styles of URLs to get to the goods.
 
@@ -158,7 +172,7 @@ VLC                | `vlc`               | `Vlc`
 BetterTouchTool    | `bettertouchtool`   | `Bettertouchtool`
 iTerm2             | `iterm2`            | `Iterm2`
 Akai LPK25 Editor  | `akai-lpk25-editor` | `AkaiLpk25Editor`
-Sublime Text 3     | `sublime-text-3`    | `SublimeText3`
+Sublime Text 3     | `sublime-text3`     | `SublimeText3`
 1Password          | `1password`         | `Onepassword` (see __NAMING NOTE__)
 
 
@@ -201,7 +215,8 @@ many features to help properly remove a Cask-installed application.
 These features are utilized via a hash argument to `uninstall` with any number
 of the following keys:
 
-* `:script` (string) - relative path to an uninstall script to be run via sudo
+* `:script` (string or hash) - relative path to an uninstall script to be run via sudo; use hash if args are needed
+  - `:executable` - relative path to an uninstall script to be run via sudo (required for hash)
   - `:args` - array of arguments to the uninstall script
   - `:input` - array of lines of input to be sent to `stdin` of the script
 * `:launchctl` (string or array) - ids of launchctl services to remove
@@ -216,9 +231,10 @@ in which `uninstall` keys appear in the Cask file is ignored.
 
 ### Good Things to Know
 
-* In order to find out the checksum for the file, the easiest way is to leave
-  it blank and attempt installation. The checksum will fail and tell you what the
-  real SHA-1 should be.
+* In order to get the SHA-1 checksum for the file, the easiest way is to run
+  `shasum <file>`. A few casks use SHA-256 checksums instead of SHA-1 checksums:
+  they replace the `sha1` field with a `sha256` field. The easiest way to get
+  the SHA-256 checksum is to run `shasum -a 256 <file>`.
 * If the application does not have versioned downloads, you can skip the
   checksum by specifying `no_checksum`, which takes no arguments.
 * We have some conventions for projects without version-specific URLs. `latest`
