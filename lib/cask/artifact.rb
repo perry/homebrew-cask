@@ -16,6 +16,8 @@ require 'cask/artifact/qlplugin'
 require 'cask/artifact/widget'
 require 'cask/artifact/service'
 require 'cask/artifact/caskroom_only'
+require 'cask/artifact/input_method'
+require 'cask/artifact/screensaver'
 
 
 module Cask::Artifact
@@ -37,10 +39,16 @@ module Cask::Artifact
       Cask::Artifact::CaskroomOnly,
       Cask::Artifact::Block,
       Cask::Artifact::Binary,
+      Cask::Artifact::InputMethod,
+      Cask::Artifact::ScreenSaver,
     ]
   end
 
   def self.for_cask(cask)
-    artifacts.select { |artifact| artifact.me?(cask) }
+    odebug "Determining which artifacts are present in Cask #{cask}"
+    artifacts.select do |artifact|
+      odebug "Checking for artifact class #{artifact}"
+      artifact.me?(cask)
+    end
   end
 end

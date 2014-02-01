@@ -13,9 +13,11 @@ class Cask::Pkg
   end
 
   def uninstall
+    odebug "Deleting pkg files"
     list('files').each_slice(500) do |file_slice|
       @command.run('/bin/rm', :args => file_slice.unshift('-f'), :sudo => true)
     end
+    odebug "Deleting pkg directories"
     _deepest_path_first(list('dirs')).each do |dir|
       if dir.exist?
         _with_full_permissions(dir) do
@@ -29,6 +31,7 @@ class Cask::Pkg
   end
 
   def forget
+    odebug "Unregistering pkg receipt (aka forgetting)"
     @command.run!('/usr/sbin/pkgutil', :args => ['--forget', package_id], :sudo => true)
   end
 
@@ -88,6 +91,6 @@ class Cask::Pkg
   end
 
   def _broken_symlink?(path)
-    path.symlink? && !path.readlink.exist?
+    path.symlink? and !path.exist?
   end
 end

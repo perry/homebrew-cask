@@ -10,6 +10,7 @@ require 'cask/auditor'
 require 'cask/without_source'
 require 'cask/checkable'
 require 'cask/cli'
+require 'cask/caveats'
 require 'cask/container'
 require 'cask/download'
 require 'cask/download_strategy'
@@ -28,6 +29,8 @@ require 'cask/source'
 require 'cask/system_command'
 require 'cask/underscore_supporting_uri'
 require 'cask/url'
+require 'cask/utils'
+require 'cask/version'
 
 require 'plist/parser'
 
@@ -38,25 +41,30 @@ class Cask
   include Cask::Options
 
   def self.init
+    odebug 'Creating directories'
     HOMEBREW_CACHE.mkpath unless HOMEBREW_CACHE.exist?
     unless caskroom.exist?
       ohai "We need to make Caskroom for the first time at #{caskroom}"
       ohai "We'll set permissions properly so we won't need sudo in the future"
       current_user = ENV['USER']
       if caskroom.parent.writable?
-        system "mkdir #{caskroom}"
+        system '/bin/mkdir', caskroom
       else
         # sudo in system is rude.
-        system "sudo mkdir -p #{caskroom}"
-        system "sudo chown -R #{current_user}:staff #{caskroom.parent}"
+        system '/usr/bin/sudo', '/bin/mkdir', '-p', caskroom
+        system '/usr/bin/sudo', '/usr/sbin/chown', '-R', "#{current_user}:staff", caskroom.parent
       end
     end
     appdir.mkpath unless appdir.exist?
     qlplugindir.mkpath unless qlplugindir.exist?
+    screen_saverdir.mkpath unless screen_saverdir.exist?
   end
 
   def self.load(query)
-    Cask::Source.for_query(query).load
+    odebug 'Loading Cask definitions'
+    cask = Cask::Source.for_query(query).load
+    odumpcask cask
+    cask
   end
 
   def self.title

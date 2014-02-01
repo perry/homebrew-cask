@@ -12,11 +12,13 @@ module Cask::DSL
 
   def version; self.class.version; end
 
+  def depends_on_formula; self.class.depends_on_formula; end
+
   def sums; self.class.sums || []; end
 
   def artifacts; self.class.artifacts; end
 
-  def caveats; ''; end
+  def caveats; self.class.caveats; end
 
   module ClassMethods
     def homepage(homepage=nil)
@@ -33,26 +35,53 @@ module Cask::DSL
       @version ||= version
     end
 
+    def depends_on_formula(*args)
+      @depends_on_formula ||= args
+    end
+
     def artifacts
       @artifacts ||= Hash.new { |hash, key| hash[key] = Set.new }
     end
 
+    def caveats(*string, &block)
+      @caveats ||= []
+      if block_given?
+        @caveats << Cask::Caveats.new(block)
+      elsif string.any?
+        @caveats << string
+      else
+        # accessor
+        @caveats
+      end
+    end
+
     ARTIFACT_TYPES = [
-      :install,
       :link,
-      :nested_container,
       :prefpane,
       :qlplugin,
       :font,
-      :uninstall,
       :widget,
       :service,
       :colorpicker,
       :binary,
       :caskroom_only,
+      :input_method,
+      :screen_saver
     ]
 
     ARTIFACT_TYPES.each do |type|
+      define_method(type) do |*args|
+        artifacts[type] << args
+      end
+    end
+
+    SPECIAL_ARTIFACT_TYPES = [
+      :install,
+      :nested_container,
+      :uninstall
+    ]
+
+    SPECIAL_ARTIFACT_TYPES.each do |type|
       define_method(type) do |*args|
         artifacts[type].merge(args)
       end

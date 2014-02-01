@@ -28,7 +28,7 @@ commands are:
 
 ## Searching for Casks
 
-The `brew cask search` command accepts a substring (or regular expression) argument.
+The `brew cask search` command accepts a series of substring arguments.
 Let's see if there's a Cask for Google Chrome:
 
 ```bash
@@ -71,7 +71,7 @@ This will both uninstall the Cask and remove symlinks which were created in
 * `info` -- displays information about the given Cask
 * `list` -- with no args, lists installed Casks; given installed Casks, lists installed files
 * `doctor` -- checks for configuration issues
-* `home` -- opens the homepage of the given Cask
+* `home` -- opens the homepage of the given Cask; or with no arguments, the homebrew-cask project page
 * `alfred` -- modifies Alfred's scope to include the Caskroom
 
 The following commands are for Cask authors:
@@ -167,6 +167,11 @@ Default is `~/Library/Widgets`
 Default is `~/Library/Fonts`
 * `--binarydir=/my/path` changes the path for binary symlinks.
 Default is `/usr/local/bin`
+* `--input_methoddir=/my/path` changes the path for Input Methods symlinks.
+Default is `~/Library/Input Methods`
+* `--screen_saverdir=/my/path` changes the path for Screen Saver symlinks.
+Default is `~/Library/Screen Savers`
+
 
 To make these settings persistent, you might want to add the following line to your `.bash_profile` or `.zshenv`:
 
@@ -182,6 +187,18 @@ options in the command line:
 # Will force the Chrome app to be linked to ~/Applications
 # even though HOMEBREW_CASK_OPTS specified /Applications
 $ brew cask install --appdir="~/Applications" google-chrome
+```
+
+## Advanced searching
+
+The default search algorithm is a lax substring approach, which does not
+use the command-line arguments exactly as given.  If you need to specify
+a search more precisely, a single search argument enclosed in `/` characters
+will be taken as a Ruby regular expression:
+
+```bash
+$ brew cask search '/^google.c[a-z]rome$/'
+google-chrome
 ```
 
 ## Other Ways to Specify a Cask
