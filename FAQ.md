@@ -10,7 +10,7 @@ Casks currently have five required fields:
  * __url__: (required) points to binary distribution of the application
  * __homepage__: the same as Homebrew's - it doesn't do anything yet, but will be wired in
  * __version__: (required) describes the version of the application available at the URL
- * __sha1__: (required unless using no_checksum) SHA-1 Checksum of the file
+ * __sha256__: (required unless using no_checksum) SHA-256 checksum of the file
  * __link__: (required for `.app`) indicates which file(s) should be linked into the Applications folder on installation
  * __install__: (required for `.pkg`) indicates which package should be installed
  * __prefpane__: (required for `.prefPane`) indicates which file(s) should be linked into the PreferencePanes folder on installation
@@ -59,7 +59,7 @@ We don't know up-front precisely what files are going to be in the
 dmg/zip/tgz/etc, so it's really helpful to have a place to dump all of them
 safely, then iterate through and act on the files we care about. For an `.app` file
 this may be symlinking it into `~/Applications` or `/Applications`, for a `.pkg` file
-this might be running the installer. For a screensaver it may be symlinking it
+this might be running the installer. For a Screen Saver it may be symlinking it
 into the appropriate directory for it to show up in System Preferences.
 
 The reason we implement this project on top of Homebrew was based on a belief

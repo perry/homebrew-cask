@@ -43,6 +43,7 @@ class Cask
   def self.init
     odebug 'Creating directories'
     HOMEBREW_CACHE.mkpath unless HOMEBREW_CACHE.exist?
+    HOMEBREW_CACHE_CASKS.mkpath unless HOMEBREW_CACHE_CASKS.exist?
     unless caskroom.exist?
       ohai "We need to make Caskroom for the first time at #{caskroom}"
       ohai "We'll set permissions properly so we won't need sudo in the future"
@@ -51,8 +52,8 @@ class Cask
         system '/bin/mkdir', caskroom
       else
         # sudo in system is rude.
-        system '/usr/bin/sudo', '/bin/mkdir', '-p', caskroom
-        system '/usr/bin/sudo', '/usr/sbin/chown', '-R', "#{current_user}:staff", caskroom.parent
+        system '/usr/bin/sudo', '--', '/bin/mkdir', '-p', '--', caskroom
+        system '/usr/bin/sudo', '--', '/usr/sbin/chown', '-R', '--', "#{current_user}:staff", caskroom.parent
       end
     end
     appdir.mkpath unless appdir.exist?

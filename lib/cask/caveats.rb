@@ -14,7 +14,9 @@ class Cask::CaveatsDSL
   def initialize(cask, block)
     @cask = cask
     retval = instance_eval &block
-    puts retval unless retval.nil?
+    unless retval.nil?
+      puts retval.to_s.sub(/[\r\n \t]*\Z/, "\n\n")
+    end
   end
 
   # helpers
@@ -30,9 +32,13 @@ class Cask::CaveatsDSL
     caskroom_path.join(@cask.version)
   end
 
-  # DSL. Each method should handle output. (The return value
-  # of the last method is also output by the caller, but that
-  # feature is only for the convenience of Cask authors.)
+  # DSL. Each method should handle output, following the convention of
+  # at least one trailing blank line so that the user can distinguish
+  # separate caveats.
+  #
+  # ( The return value of the last method in the block is also sent
+  #   to the output by the caller, but that feature is only for the
+  #   convenience of Cask authors. )
   def manual_installer(path)
     puts <<-EOS.undent
     To complete the installation of Cask #{@cask}, you must also
@@ -60,6 +66,7 @@ class Cask::CaveatsDSL
       Cask #{@cask} installs files under "#{localpath}".  The presence of such
       files can cause warnings when running "brew doctor", which is considered
       to be a bug in homebrew-cask.
+
       EOS
     end
   end
@@ -68,12 +75,14 @@ class Cask::CaveatsDSL
     puts <<-EOS.undent
     You must log out and log back in for the installation of #{@cask}
     to take effect.
+
     EOS
   end
 
   def reboot
     puts <<-EOS.undent
     You must reboot for the installation of #{@cask} to take effect.
+
     EOS
   end
 
@@ -97,6 +106,32 @@ class Cask::CaveatsDSL
       But you appear to be running on an unsupported architecture:
 
         #{this_arch}
+
+      Therefore #{@cask} is not expected to work on your system.
+
+      EOS
+    end
+  end
+
+  # minor bug: because output from os_version_only is conditional, the
+  # existence of this directive causes the "===> Caveats" header to
+  # appear even if no warning is output.  One workaround would
+  # be to spin out os-version-detection from caveats into a separate
+  # Cask stanza, and that is probably a sensible design.
+  def os_versions_only(*supported_versions)
+    known_versions = %w{10.0 10.1 10.2 10.3 10.3 10.5 10.6 10.7 10.8 10.9}
+    supported_versions.each do |version|
+      unless known_versions.include?(version)
+        # There ought to be some standard exceptions for Cask validation errors
+        raise "The only valid arguments to caveats os_version_only in #{@cask} are: #{known_versions.join(', ')}"
+      end
+    end
+    unless supported_versions.include?(MACOS_VERSION)
+      puts <<-EOS.undent
+      Cask #{@cask} provides binaries for these OS versions: #{supported_versions.join(', ')}.
+      But you appear to be running on an unsupported version
+
+        #{MACOS_VERSION}
 
       Therefore #{@cask} is not expected to work on your system.
 

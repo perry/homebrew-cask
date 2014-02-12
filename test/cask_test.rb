@@ -9,6 +9,9 @@ describe "Cask" do
     end
 
     it "returns an instance of the cask from a specific file location" do
+      if Object.constants.include?(:Dia)
+        Object.send(:remove_const, :Dia)
+      end
       location = File.expand_path('./Casks/dia.rb')
       c = Cask.load(location)
       c.must_be_kind_of(Cask)
@@ -16,6 +19,9 @@ describe "Cask" do
     end
 
     it "returns an instance of the cask from a url" do
+      if Object.constants.include?(:Dia)
+        Object.send(:remove_const, :Dia)
+      end
       url = "file://" + File.expand_path('./Casks/dia.rb')
       c = shutup do
         Cask.load(url)
@@ -34,14 +40,17 @@ describe "Cask" do
     end
 
     it "returns an instance of the cask from a relative file location" do
-      c = Cask.load("./Casks/dia.rb")
+      if Object.constants.include?(:Bbedit)
+        Object.send(:remove_const, :Bbedit)
+      end
+      c = Cask.load("./Casks/bbedit.rb")
       c.must_be_kind_of(Cask)
-      c.must_be_instance_of(Dia)
+      c.must_be_instance_of(Bbedit)
     end
 
     it "uses exact match when loading by name" do
       Cask.load('rest-client').must_be_instance_of(RestClient)
-      Cask.load('cocoa-rest-client').must_be_instance_of(CocoaRestClient)
+      Cask.load('cocoarestclient').must_be_instance_of(Cocoarestclient)
     end
 
     it "raises an error when attempting to load a cask that doesn't exist" do
