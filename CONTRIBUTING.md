@@ -108,13 +108,15 @@ Additional fields you might need for special use-cases:
 
 ### URL Details
 
-In most cases, a plain URL is all you need to specify for Cask to download and extract a file. Sometimes, additional information is required for the `curl`-based downloader to successfully fetch the file. There are a few options to help in these cases, which are specified in a hash as a second argument to `url`.
+#### HTTP URLs
 
-| option             | description |
+In most cases, a plain URL string is all you need to specify for a Cask. Sometimes, additional information is required for the `curl`-based downloader to successfully fetch the file. There are a few options to help in these cases, which can be given as key/value pairs appended to `url`:
+
+| key                | value       |
 | ------------------ | ----------- |
 | `:cookies`         | a hash of cookies to be set in the download request
-| `:referer`         | a URL to set as referrer in the download request
-| `:user_agent`      | user agent string to set for the download request. can also be set to `:fake`, which will use a generic Browser-like user agent string. we prefer `:fake` when the server does not require a specific user agent.
+| `:referer`         | a string holding the URL to set as referrer in the download request
+| `:user_agent`      | a string holding the user agent to set for the download request. Can also be set to the symbol `:fake`, which will use a generic Browser-like user agent string. we prefer `:fake` when the server does not require a specific user agent.
 
 #### SourceForge URLs
 
@@ -134,26 +136,51 @@ If the "latest" URL does not point to a valid file for a Mac app, then we fall b
 http://downloads.sourceforge.net/sourceforge/$PROJECTNAME/$FILENAME.$EXT
 ```
 
+#### Subversion URLs
+
+In rare cases, a distribution may not be available over ordinary HTTP.  Subversion URLs are also supported, and can be specified by appending the following key/value pairs to `url`:
+
+| key                | value       |
+| ------------------ | ----------- |
+| `:using`           | the symbol `:svn` is the only legal value
+| `:revision`        | a string identifying the subversion revision to download
+| `:trust_cert`      | set to `true` to automatically trust the certificate presented by the server (avoiding an interactive prompt)
+
+
 ### Naming Casks
 
 We try to maintain a consistent naming policy so everything stays clean and predictable.
 
-#### Start From the App's Canonical Name
+#### Find the Canonical Name of the Author's Distribution
 
-  * do your best to find the canonical name for the title of the app you're submitting a Cask for
-  * however the author writes the app name is how it should be styled; this can usually be found on the author's website or within the application itself;
-  * pay attention to details, for example: `"Git Hub" != "git_hub" != "GitHub"`
+##### Canonical Names of Apps
+
+  * Start with the exact name of the Application bundle as it appears on disk,
+    such as `Google Chrome.app`
+  * Remove `.app` from the end
+  * Translate the name into English if necessary
+  * Pay attention to details, for example: `"Git Hub" != "git_hub" != "GitHub"`
+  * If the result of that process is something unhelpful, such as `Macintosh Installer`,
+    then just create the best name you can, based on the author's web page.
+
+##### Canonical Names of `pkg`-based Installers
+
+  * The Canonical Name of a `pkg` may be more tricky to determine than that
+    of an App.  If so, just create the best name you can, based on the
+    author's web page.
 
 #### Cask Name
 
-A Cask's "name" is its primary identifier in our project. It's the string people will use to interact with this Cask on their system.
+A "Cask name" is the primary identifier for a package in our project. It's the string
+people will use to interact with this Cask on their system.
 
-To get from an app's canonical name to a Cask name:
+To get from the App's canonical name to the Cask name:
 
-  * all lower case
+  * convert all letters to lower case
+  * hyphens stay hyphens
   * spaces become hyphens
   * digits stay digits
-  * examples
+  * a leading digit gets spelled out into English: `1password` becomes `onepassword`
 
 Casks are stored in a Ruby file matching their name.
 
@@ -281,6 +308,7 @@ is the most useful.
   - `:executable` - relative path to an uninstall script to be run via sudo (required for hash form)
   - `:args` - array of arguments to the uninstall script
   - `:input` - array of lines of input to be sent to `stdin` of the script
+  - `:must_succeed` - set to `false` if the script is allowed to fail
 * `:files` (array) - absolute paths of files or directories to remove.  `:files` should only be used as a last resort. `:pkgutil` is strongly preferred
 
 Each `uninstall` technique is applied according to the order above. The order
