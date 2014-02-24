@@ -32,7 +32,7 @@ open ~/Applications/"Google Chrome.app"
 
  * Find basic documentation on using homebrew-cask in [USAGE.md](USAGE.md)
  * Want to contribute a Cask? Awesome! See [CONTRIBUTING.md](CONTRIBUTING.md)
- * Want to hack on our code? Also awesome! See [HACKING.md](HACKING.md)
+ * Want to hack on our code? Also awesome! See [doc/HACKING.md](doc/HACKING.md)
  * More project-related details and discussion are available in [FAQ.md](FAQ.md)
 
 ## Questions? Wanna chat?
@@ -50,6 +50,13 @@ be shy about reporting it on our [GitHub issues page](https://github.com/phinze/
 When reporting bugs, remember that homebrew-cask is an independent project from
 Homebrew.  Do your best to direct bug reports to the appropriate project.  If
 your command-line started with `brew cask`, bring the bug to us first!
+
+Before reporting a bug, make sure you have the latest versions of Homebrew,
+homebrew-cask, and all Taps by running the following command:
+
+```bash
+$ brew update && brew upgrade brew-cask && brew cleanup
+```
 
 ## License:
 Code is under the [BSD 2 Clause (NetBSD) license](LICENSE)
